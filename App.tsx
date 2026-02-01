@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { LearningMode, ChatMessage } from './types';
 import { GeminiTeacher } from './services/geminiService';
@@ -15,12 +14,18 @@ const App: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState(false);
   
   const teacherRef = useRef<GeminiTeacher | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  // Initialize Speech Recognition
+  useEffect(() => {
+    if (!process.env.API_KEY) {
+      console.error("API_KEY is missing from environment variables.");
+    }
+  }, []);
+
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -65,16 +70,24 @@ const App: React.FC = () => {
 
   const handleOnboard = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!process.env.API_KEY) {
+      setApiKeyError(true);
+      return;
+    }
     if (studentName.trim()) {
-      teacherRef.current = new GeminiTeacher(studentName, studentGrade);
-      setIsOnboarded(true);
-      setMessages([
-        {
-          role: 'teacher',
-          text: `Hello ${studentName}! I'm Your Personal Teacher. I'm so happy to help you learn today. What would you like to study in Grade ${studentGrade}?`,
-          timestamp: new Date()
-        }
-      ]);
+      try {
+        teacherRef.current = new GeminiTeacher(studentName, studentGrade);
+        setIsOnboarded(true);
+        setMessages([
+          {
+            role: 'teacher',
+            text: `Hello ${studentName}! I'm Your Personal Teacher. I'm so happy to help you learn today. What would you like to study in Grade ${studentGrade}?`,
+            timestamp: new Date()
+          }
+        ]);
+      } catch (err) {
+        setApiKeyError(true);
+      }
     }
   };
 
@@ -131,13 +144,33 @@ const App: React.FC = () => {
     ]);
   };
 
+  if (apiKeyError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-50 p-6">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 border-4 border-red-200 text-center">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">API Key Missing</h1>
+          <p className="text-slate-600 mb-6 leading-relaxed">
+            I can't start the lesson without my teaching materials! Please make sure you have created a <b>.env</b> file in your project folder with your <b>API_KEY</b>.
+          </p>
+          <button 
+            onClick={() => setApiKeyError(false)}
+            className="bg-slate-800 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-700 transition-all"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!isOnboarded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-blue-50 p-6">
+      <div className="min-h-screen flex items-center justify-center bg-sky-50 p-6">
         <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 border-4 border-yellow-300">
           <div className="text-center mb-8">
             <TeacherAvatar />
-            <h1 className="text-4xl font-bold text-blue-600 mt-4 tracking-tight">TutorBot</h1>
+            <h1 className="text-4xl font-bold text-blue-600 mt-4 tracking-tight font-display">TutorBot</h1>
             <p className="text-slate-500 mt-2">Your Personal Teacher is ready to meet you!</p>
           </div>
           <form onSubmit={handleOnboard} className="space-y-6">
@@ -149,7 +182,7 @@ const App: React.FC = () => {
                 value={studentName}
                 onChange={(e) => setStudentName(e.target.value)}
                 placeholder="Type your name here..."
-                className="w-full p-4 bg-slate-100 rounded-2xl border-2 border-transparent focus:border-yellow-400 outline-none transition-all text-lg"
+                className="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 focus:border-yellow-400 focus:bg-white outline-none transition-all text-lg"
               />
             </div>
             <div>
@@ -157,13 +190,11 @@ const App: React.FC = () => {
               <select 
                 value={studentGrade}
                 onChange={(e) => setStudentGrade(e.target.value)}
-                className="w-full p-4 bg-slate-100 rounded-2xl border-2 border-transparent focus:border-yellow-400 outline-none transition-all text-lg appearance-none"
+                className="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 focus:border-yellow-400 focus:bg-white outline-none transition-all text-lg appearance-none cursor-pointer"
               >
-                <option value="1">Grade 1</option>
-                <option value="2">Grade 2</option>
-                <option value="3">Grade 3</option>
-                <option value="4">Grade 4</option>
-                <option value="5">Grade 5</option>
+                {[1, 2, 3, 4, 5].map(g => (
+                  <option key={g} value={g}>Grade {g}</option>
+                ))}
               </select>
             </div>
             <button 
@@ -179,13 +210,13 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col max-w-2xl mx-auto shadow-2xl bg-white overflow-hidden">
+    <div className="min-h-screen flex flex-col max-w-2xl mx-auto shadow-2xl bg-white overflow-hidden border-x border-slate-100">
       {/* Header */}
-      <header className="bg-yellow-400 p-6 flex items-center justify-between shadow-md">
+      <header className="bg-yellow-400 p-6 flex items-center justify-between shadow-md z-10">
         <div className="flex items-center space-x-4">
           <TeacherAvatar isThinking={isThinking} />
           <div>
-            <h1 className="text-2xl font-bold text-yellow-900 leading-tight tracking-wide">TutorBot</h1>
+            <h1 className="text-2xl font-bold text-yellow-900 leading-tight tracking-wide font-display">TutorBot</h1>
             <p className="text-sm font-medium text-yellow-800">Your Personal Teacher</p>
             <div className="mt-2 inline-flex items-center bg-white/50 px-3 py-1 rounded-full text-xs font-bold text-yellow-900 shadow-sm space-x-2">
               <span>🌟</span>
@@ -198,7 +229,7 @@ const App: React.FC = () => {
         {mode !== LearningMode.IDLE && (
           <button 
             onClick={resetToHome}
-            className="bg-white/80 hover:bg-white text-yellow-700 px-4 py-2 rounded-full font-bold shadow-sm transition-all"
+            className="bg-white/80 hover:bg-white text-yellow-700 px-4 py-2 rounded-full font-bold shadow-sm transition-all text-sm active:scale-95"
           >
             Home 🏠
           </button>
@@ -206,13 +237,13 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative overflow-hidden">
+      <main className="flex-1 flex flex-col relative overflow-hidden bg-slate-50">
         {mode === LearningMode.IDLE ? (
           <div className="p-8 flex-1 overflow-y-auto">
-            <h2 className="text-3xl font-bold text-blue-600 text-center mb-8 tracking-wide px-4 leading-normal">
-              What shall we study, <span className="inline-block px-1">{studentName}</span>?
+            <h2 className="text-3xl font-bold text-blue-600 text-center mb-8 tracking-wide px-4 leading-normal font-display">
+              What shall we study, <span className="inline-block px-1 text-yellow-600">{studentName}</span>?
             </h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-6">
               <ModeCard 
                 mode={LearningMode.MATH} 
                 icon="➕" 
@@ -231,21 +262,21 @@ const App: React.FC = () => {
                 mode={LearningMode.SCIENCE} 
                 icon="🔬" 
                 title="Science" 
-                color="bg-green-400" 
+                color="bg-green-500" 
                 onClick={handleModeSelect} 
               />
               <ModeCard 
                 mode={LearningMode.QUIZ} 
                 icon="🧠" 
                 title="Quiz" 
-                color="bg-purple-400" 
+                color="bg-purple-500" 
                 onClick={handleModeSelect} 
               />
             </div>
             
-            <div className="mt-12 p-6 bg-yellow-50 rounded-3xl border-2 border-dashed border-yellow-200 text-center">
-              <p className="text-yellow-700 font-medium italic">
-                "Keep going, {studentName}! You're doing great!"
+            <div className="mt-12 p-8 bg-yellow-50 rounded-3xl border-4 border-dashed border-yellow-200 text-center float-animation">
+              <p className="text-yellow-700 font-bold italic text-lg">
+                "Keep going, {studentName}! You're doing great!" 🌟
               </p>
             </div>
           </div>
@@ -253,7 +284,7 @@ const App: React.FC = () => {
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             <div 
               ref={scrollRef}
-              className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50"
+              className="flex-1 overflow-y-auto p-4 space-y-4"
             >
               {messages.map((msg, idx) => (
                 <div 
@@ -261,9 +292,9 @@ const App: React.FC = () => {
                   className={`flex ${msg.role === 'teacher' ? 'justify-start' : 'justify-end'}`}
                 >
                   <div 
-                    className={`max-w-[85%] p-4 rounded-2xl shadow-sm text-lg leading-relaxed ${
+                    className={`max-w-[85%] p-4 rounded-3xl shadow-sm text-lg leading-relaxed ${
                       msg.role === 'teacher' 
-                        ? 'bg-white text-slate-800 border-l-4 border-yellow-400' 
+                        ? 'bg-white text-slate-800 border-l-8 border-yellow-400 rounded-tl-none' 
                         : 'bg-blue-500 text-white rounded-br-none'
                     }`}
                   >
@@ -273,27 +304,28 @@ const App: React.FC = () => {
               ))}
               {isThinking && (
                 <div className="flex justify-start">
-                  <div className="bg-white p-4 rounded-2xl border-l-4 border-yellow-400 animate-pulse text-slate-400">
-                    Thinking... ✏️
+                  <div className="bg-white p-4 rounded-3xl rounded-tl-none border-l-8 border-yellow-400 animate-pulse text-slate-400 flex items-center gap-2">
+                    <span className="text-xl">✏️</span>
+                    <span>Teacher is writing...</span>
                   </div>
                 </div>
               )}
             </div>
 
             {/* Input Form with Speech */}
-            <div className="p-4 bg-white border-t-2 border-slate-100">
+            <div className="p-4 bg-white border-t-2 border-slate-100 shadow-lg">
               <form 
                 onSubmit={handleSendMessage}
-                className="flex items-center space-x-2"
+                className="flex items-center gap-3"
               >
                 <div className="flex-1 relative flex items-center">
                   <input
                     type="text"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    placeholder={isListening ? "Listening..." : "Type or speak your answer..."}
-                    className={`w-full p-4 pr-12 bg-slate-100 rounded-2xl border-2 transition-all text-lg outline-none ${
-                      isListening ? 'border-red-400 bg-red-50' : 'border-transparent focus:border-yellow-400'
+                    placeholder={isListening ? "I'm listening..." : "Type your answer here..."}
+                    className={`w-full p-4 pr-12 bg-slate-50 rounded-2xl border-2 transition-all text-lg outline-none ${
+                      isListening ? 'border-red-400 bg-red-50 ring-4 ring-red-100' : 'border-slate-100 focus:border-yellow-400 focus:bg-white'
                     }`}
                   />
                   <button
@@ -310,13 +342,16 @@ const App: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isThinking || !inputText.trim()}
-                  className="bg-blue-500 hover:bg-blue-600 disabled:bg-slate-300 text-white p-4 rounded-2xl font-bold transition-all transform active:scale-95 shadow-md"
+                  className="bg-blue-500 hover:bg-blue-600 disabled:bg-slate-300 text-white px-6 py-4 rounded-2xl font-bold transition-all transform active:scale-95 shadow-md flex-shrink-0"
                 >
                   Send 🚀
                 </button>
               </form>
               {isListening && (
-                <p className="text-xs text-red-500 mt-2 font-bold animate-pulse">Recording... Speak now!</p>
+                <div className="flex items-center gap-2 mt-2 px-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                  <p className="text-xs text-red-500 font-bold uppercase tracking-wider">Recording... Speak clearly!</p>
+                </div>
               )}
             </div>
           </div>
@@ -324,8 +359,8 @@ const App: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-100 p-4 text-center text-sm text-slate-500 border-t border-slate-200">
-        TutorBot Classroom • Grade {studentGrade} • Your Personal Teacher
+      <footer className="bg-white p-4 text-center text-sm text-slate-400 border-t border-slate-100">
+        TutorBot Classroom • Grade {studentGrade} • Friendly Learning Environment
       </footer>
     </div>
   );

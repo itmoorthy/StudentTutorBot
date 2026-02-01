@@ -1,15 +1,5 @@
 
-body {
-    font-family: 'Quicksand', sans-serif;
-    background-color: #f0f9ff;
-    margin: 0;
-}
-
-h1, h2, h3, .font-display {
-    font-family: 'Fredoka', sans-serif;
-}
-
-/* Custom scrollbar for a friendlier look */
+/* Custom friendly scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -22,4 +12,24 @@ h1, h2, h3, .font-display {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Base styles to ensure fonts load before tailwind applies them */
+body {
+    font-family: 'Quicksand', sans-serif;
+    background-color: #f0f9ff;
+}
+
+h1, h2, h3, h4, .font-display {
+    font-family: 'Fredoka', sans-serif;
 }

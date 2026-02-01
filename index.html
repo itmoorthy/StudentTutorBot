@@ -5,10 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TutorBot - Your Personal Teacher</title>
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS Play CDN -->
+    
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -22,9 +25,14 @@
         },
       }
     </script>
+
+    <!-- Global Shim for process.env -->
     <script>
-      // Fallback for process.env in browser environments
-      window.process = window.process || { env: {} };
+      window.process = {
+        env: {
+          API_KEY: "" // Will be overridden by Vite define or environment
+        }
+      };
     </script>
 <script type="importmap">
 {
@@ -39,7 +47,7 @@
 }
 </script>
 </head>
-<body class="bg-sky-50">
+<body class="bg-sky-50 text-slate-900 font-sans">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
 </body>
