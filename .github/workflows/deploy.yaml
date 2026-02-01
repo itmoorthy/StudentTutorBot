@@ -13,28 +13,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: npm
 
-      # 3️⃣ Install dependencies (stable for CI)
+      # ⭐ ADD THIS STEP
+      - name: Clean npm cache (fix rollup optional deps bug)
+        run: npm cache clean --force
+
       - name: Install dependencies
         run: npm ci
 
-      # 4️⃣ Build project with env variable
       - name: Build project
         run: npm run build
         env:
           VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
 
-      # 5️⃣ Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
