@@ -2,7 +2,9 @@
 import { GoogleGenAI, Chat } from "@google/genai";
 import { LearningMode } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Always use the API key directly from process.env.API_KEY as per guidelines.
+// The SDK instance is created once here as this model does not require the user-selected key flow.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export class GeminiTeacher {
   private chat: Chat | null = null;
@@ -54,6 +56,7 @@ Always act like a helpful school teacher, not a chatbot.
     try {
       if (!this.chat) this.resetChat();
       const response = await this.chat!.sendMessage({ message });
+      // Use the .text property on the GenerateContentResponse object directly.
       return response.text || "I'm sorry, I missed that. Can you say it again?";
     } catch (error) {
       console.error("Gemini Error:", error);
