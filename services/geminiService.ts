@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Chat } from "@google/genai";
 import { LearningMode } from "../types";
 
@@ -9,10 +8,10 @@ export class GeminiTeacher {
   private studentGrade: string = '4';
 
   constructor(name: string, grade: string) {
-    // Attempt to get API key from environment or global shim
-    const apiKey = process.env.API_KEY || (window as any).process?.env?.API_KEY || "";
+    // Robust API Key retrieval for local Vite and production
+    const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : (window as any).API_KEY;
     
-    this.ai = new GoogleGenAI({ apiKey });
+    this.ai = new GoogleGenAI({ apiKey: apiKey || "" });
     this.studentName = name;
     this.studentGrade = grade;
     this.resetChat();

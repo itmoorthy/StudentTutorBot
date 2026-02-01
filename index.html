@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS CDN -->
+
+    <!-- Tailwind CSS CDN - Ensures styles work immediately without build lag -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -24,15 +23,6 @@
           },
         },
       }
-    </script>
-
-    <!-- Global Shim for process.env -->
-    <script>
-      window.process = {
-        env: {
-          API_KEY: "" // Will be overridden by Vite define or environment
-        }
-      };
     </script>
 <script type="importmap">
 {
