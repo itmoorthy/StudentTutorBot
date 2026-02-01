@@ -1,0 +1,7 @@
+{
+  "name": "StudentTutorBot",
+  "description": "A friendly AI-powered educational assistant for students, featuring math practice, spelling challenges, science facts, and fun quizzes with your personal teacher.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
