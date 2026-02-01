@@ -10,8 +10,13 @@ export default defineConfig(({ mode }) => {
       'process.env.API_KEY': JSON.stringify(env.API_KEY || '')
     },
     server: {
-      port: 5173,
-      open: true
+      port: 1001,
+      open: false,
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
     }
   };
 });
