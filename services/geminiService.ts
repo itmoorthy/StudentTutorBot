@@ -56,7 +56,7 @@ Always act like a helpful school teacher, not a chatbot.
     try {
       if (!this.chat) this.resetChat();
       const response = await this.chat!.sendMessage({ message });
-      return response.text;
+      return response.text || "No response from AI.";
     } catch (error) {
       console.error("Gemini Error:", error);
       return "Oh dear, my chalkboard seems a bit dusty! Please check if your API key is set correctly in your .env file and try again.";

@@ -5,6 +5,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   
   return {
+    base: mode === 'production' ? '/StudentTutorBot/' : '/',
     plugins: [react()],
     define: {
       'process.env.API_KEY': JSON.stringify(env.API_KEY || '')
