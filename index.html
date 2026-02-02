@@ -16,6 +16,9 @@
     <!-- Tailwind CSS CDN - Ensures styles work immediately without build lag -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+      // Polyfill process for browser compatibility to fix "process is not defined" error
+      window.process = { env: {} };
+
       tailwind.config = {
         theme: {
           extend: {
