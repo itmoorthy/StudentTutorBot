@@ -13,22 +13,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS CDN - Ensures styles work immediately without build lag -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <script>
       // Polyfill process for browser compatibility to fix "process is not defined" error
       window.process = { env: {} };
-
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Quicksand', 'sans-serif'],
-              display: ['Fredoka', 'sans-serif'],
-            },
-          },
-        },
-      }
     </script>
 <script type="importmap">
 {
