@@ -47,7 +47,7 @@ Always act like a helpful school teacher, not a chatbot.
 
   resetChat() {
     this.chat = this.ai.chats.create({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       config: {
         systemInstruction: this.getSystemInstruction(),
       },
@@ -68,6 +68,9 @@ Always act like a helpful school teacher, not a chatbot.
       }
       if (errorMessage.includes("API key was reported as leaked")) {
         return "🚫 **Security Alert:** This API key was blocked by Google because it was exposed. Please generate a new key in AI Studio and update your GitHub Secrets.";
+      }
+      if (errorMessage.includes("503") || errorMessage.includes("overloaded")) {
+        return "Hg **Server Busy:** The AI teacher is currently helping too many students (Google servers are overloaded). Please wait a moment and try again.";
       }
 
       return "Oh dear, my chalkboard seems a bit dusty! Please check if your API key is set correctly in your .env file and try again.";
