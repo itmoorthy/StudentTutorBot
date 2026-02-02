@@ -32,7 +32,7 @@ jobs:
       - name: Build project
         run: npm run build
         env:
-          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+          VITE_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
           ROLLUP_NO_NATIVE: 1
 
       # 5️⃣ Deploy to GitHub Pages

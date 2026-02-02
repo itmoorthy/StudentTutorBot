@@ -9,7 +9,9 @@ export class GeminiTeacher {
 
   constructor(name: string, grade: string) {
     // Robust API Key retrieval for local Vite and production
-    const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : (window as any).API_KEY;
+    const apiKey = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_KEY) ||
+                   (typeof process !== 'undefined' ? process.env.API_KEY : undefined) ||
+                   (typeof window !== 'undefined' ? (window as any).API_KEY : undefined);
     
     this.ai = new GoogleGenAI({ apiKey: apiKey || "" });
     this.studentName = name;
