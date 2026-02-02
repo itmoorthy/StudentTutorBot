@@ -59,8 +59,17 @@ Always act like a helpful school teacher, not a chatbot.
       if (!this.chat) this.resetChat();
       const response = await this.chat!.sendMessage({ message });
       return response.text || "No response from AI.";
-    } catch (error) {
+    } catch (error: any) {
       console.error("Gemini Error:", error);
+
+      const errorMessage = error.message || error.toString();
+      if (errorMessage.includes("API Key not found")) {
+        return "🚫 **Configuration Error:** The API key is missing. Please ensure VITE_API_KEY is added to your GitHub Repository Secrets and the site is redeployed.";
+      }
+      if (errorMessage.includes("API key was reported as leaked")) {
+        return "🚫 **Security Alert:** This API key was blocked by Google because it was exposed. Please generate a new key in AI Studio and update your GitHub Secrets.";
+      }
+
       return "Oh dear, my chalkboard seems a bit dusty! Please check if your API key is set correctly in your .env file and try again.";
     }
   }
