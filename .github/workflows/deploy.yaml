@@ -26,14 +26,13 @@ jobs:
 
       # 3️⃣ Install dependencies (avoid Rollup native bug)
       - name: Install dependencies
-        run: npm ci --no-optional
+        run: npm ci
 
       # 4️⃣ Build project (force Rollup JS mode)
       - name: Build project
         run: npm run build
         env:
           VITE_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
-          ROLLUP_NO_NATIVE: 1
 
       # 5️⃣ Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
