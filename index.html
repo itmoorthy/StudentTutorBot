@@ -16,6 +16,9 @@
     <!-- Tailwind CSS CDN - Ensures styles work immediately without build lag -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+      // Polyfill process for browser compatibility to fix "process is not defined" error
+      window.process = { env: {} };
+
       tailwind.config = {
         theme: {
           extend: {
@@ -40,7 +43,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/StudentTutorBot/assets/index-Dc5LGFxQ.js"></script>
+  <script type="module" crossorigin src="/StudentTutorBot/assets/index-DNg6wcJl.js"></script>
   <link rel="stylesheet" crossorigin href="/StudentTutorBot/assets/index-BYWy8vYu.css">
 </head>
 <body class="bg-sky-50 text-slate-900 font-sans">
