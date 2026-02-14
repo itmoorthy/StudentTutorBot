@@ -4,13 +4,6 @@ import { GeminiTeacher } from './services/geminiService';
 import { TeacherAvatar } from './components/TeacherAvatar';
 import { ModeCard } from './components/ModeCard';
 
-// Helper to get API key safely from Vite or other environments
-const getApiKey = () => {
-  return (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_KEY) ||
-         (typeof process !== 'undefined' ? (process as any).env?.API_KEY : undefined) ||
-         (typeof window !== 'undefined' ? (window as any).API_KEY : undefined);
-};
-
 const App: React.FC = () => {
   const [isOnboarded, setIsOnboarded] = useState(false);
   const [studentName, setStudentName] = useState('');
@@ -28,8 +21,8 @@ const App: React.FC = () => {
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
-    if (!getApiKey()) {
-      console.error("VITE_API_KEY is missing from environment variables.");
+    if (!process.env.API_KEY) {
+      console.error("API_KEY is missing from environment variables.");
     }
   }, []);
 
@@ -77,7 +70,7 @@ const App: React.FC = () => {
 
   const handleOnboard = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!getApiKey()) {
+    if (!process.env.API_KEY) {
       setApiKeyError(true);
       return;
     }
@@ -158,7 +151,7 @@ const App: React.FC = () => {
           <div className="text-5xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold text-red-600 mb-4">API Key Missing</h1>
           <p className="text-slate-600 mb-6 leading-relaxed">
-            I can't start the lesson without my teaching materials! Please make sure you have created a <b>.env</b> file in your project folder with your <b>VITE_API_KEY</b>.
+            I can't start the lesson without my teaching materials! Please make sure you have created a <b>.env</b> file in your project folder with your <b>API_KEY</b>.
           </p>
           <button 
             onClick={() => setApiKeyError(false)}
