@@ -1,5 +1,7 @@
+
 import { GoogleGenAI, Chat } from "@google/genai";
 import { LearningMode } from "../types";
+import { apiKeyService } from "./apiKeyService";
 
 export class GeminiTeacher {
   private ai: GoogleGenAI;
@@ -8,10 +10,14 @@ export class GeminiTeacher {
   private studentGrade: string = '4';
 
   constructor(name: string, grade: string) {
-    // Robust API Key retrieval for local Vite and production
-    const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : (window as any).API_KEY;
+    // Priority: User-provided key from localStorage -> Environment variable
+    const apiKey = apiKeyService.getKey() || process.env.API_KEY || '';
     
-    this.ai = new GoogleGenAI({ apiKey: apiKey || "" });
+    if (!apiKey) {
+      console.warn("No Gemini API key found. TutorBot will not be able to respond.");
+    }
+
+    this.ai = new GoogleGenAI({ apiKey });
     this.studentName = name;
     this.studentGrade = grade;
     this.resetChat();
@@ -56,10 +62,11 @@ Always act like a helpful school teacher, not a chatbot.
     try {
       if (!this.chat) this.resetChat();
       const response = await this.chat!.sendMessage({ message });
-      return response.text;
+      // response.text is a property, not a method.
+      return response.text || "I'm sorry, I couldn't find the right words to explain that. Let's try again!";
     } catch (error) {
       console.error("Gemini Error:", error);
-      return "Oh dear, my chalkboard seems a bit dusty! Please check if your API key is set correctly in your .env file and try again.";
+      return "Oh dear, my chalkboard seems a bit dusty! Let's try our lesson again in a moment.";
     }
   }
 

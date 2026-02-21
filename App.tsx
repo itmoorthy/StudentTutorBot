@@ -1,8 +1,12 @@
+
 import React, { useState, useEffect, useRef } from 'react';
+import { Settings } from 'lucide-react';
 import { LearningMode, ChatMessage } from './types';
 import { GeminiTeacher } from './services/geminiService';
 import { TeacherAvatar } from './components/TeacherAvatar';
 import { ModeCard } from './components/ModeCard';
+import { ApiKeyModal } from './components/ApiKeyModal';
+import { apiKeyService } from './services/apiKeyService';
 
 const App: React.FC = () => {
   const [isOnboarded, setIsOnboarded] = useState(false);
@@ -14,15 +18,16 @@ const App: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [apiKeyError, setApiKeyError] = useState(false);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   
   const teacherRef = useRef<GeminiTeacher | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
-    if (!process.env.API_KEY) {
-      console.error("API_KEY is missing from environment variables.");
+    // Check if API key is set, if not show modal
+    if (!apiKeyService.hasKey() && !process.env.API_KEY) {
+      setIsApiKeyModalOpen(true);
     }
   }, []);
 
@@ -70,10 +75,6 @@ const App: React.FC = () => {
 
   const handleOnboard = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!process.env.API_KEY) {
-      setApiKeyError(true);
-      return;
-    }
     if (studentName.trim()) {
       try {
         teacherRef.current = new GeminiTeacher(studentName, studentGrade);
@@ -86,7 +87,7 @@ const App: React.FC = () => {
           }
         ]);
       } catch (err) {
-        setApiKeyError(true);
+        console.error("Failed to initialize teacher:", err);
       }
     }
   };
@@ -143,26 +144,6 @@ const App: React.FC = () => {
       }
     ]);
   };
-
-  if (apiKeyError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-red-50 p-6">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 border-4 border-red-200 text-center">
-          <div className="text-5xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-red-600 mb-4">API Key Missing</h1>
-          <p className="text-slate-600 mb-6 leading-relaxed">
-            I can't start the lesson without my teaching materials! Please make sure you have created a <b>.env</b> file in your project folder with your <b>API_KEY</b>.
-          </p>
-          <button 
-            onClick={() => setApiKeyError(false)}
-            className="bg-slate-800 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-700 transition-all"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   if (!isOnboarded) {
     return (
@@ -226,14 +207,23 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
-        {mode !== LearningMode.IDLE && (
+        <div className="flex items-center gap-2">
           <button 
-            onClick={resetToHome}
-            className="bg-white/80 hover:bg-white text-yellow-700 px-4 py-2 rounded-full font-bold shadow-sm transition-all text-sm active:scale-95"
+            onClick={() => setIsApiKeyModalOpen(true)}
+            className="p-2 bg-white/50 hover:bg-white text-yellow-900 rounded-full transition-all active:scale-95 shadow-sm"
+            title="Settings"
           >
-            Home 🏠
+            <Settings size={20} />
           </button>
-        )}
+          {mode !== LearningMode.IDLE && (
+            <button 
+              onClick={resetToHome}
+              className="bg-white/80 hover:bg-white text-yellow-700 px-4 py-2 rounded-full font-bold shadow-sm transition-all text-sm active:scale-95"
+            >
+              Home 🏠
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Main Content Area */}
@@ -362,6 +352,17 @@ const App: React.FC = () => {
       <footer className="bg-white p-4 text-center text-sm text-slate-400 border-t border-slate-100">
         TutorBot Classroom • Grade {studentGrade} • Friendly Learning Environment
       </footer>
+
+      <ApiKeyModal 
+        isOpen={isApiKeyModalOpen} 
+        onClose={() => setIsApiKeyModalOpen(false)}
+        onSave={(key) => {
+          // Re-initialize teacher if already onboarded
+          if (isOnboarded) {
+            teacherRef.current = new GeminiTeacher(studentName, studentGrade);
+          }
+        }}
+      />
     </div>
   );
 };
